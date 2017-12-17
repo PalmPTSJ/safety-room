@@ -7,13 +7,158 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-
-
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+        
+        <style>
+            #header_navbar {
+                background-color: #2196F3;
+            }
+            
+            
+            #section_head {
+                background-color : #FFF;
+            }
+            
+            
+            #section_sensor {
+                padding:50px;
+            }
+            .section_sensor--normal {
+                background-color : #43A047;
+            }
+            .section_sensor--detected {
+                background-color : #F44336;
+            }
+            
+            #section_sensor_value {
+                font-size:80px;
+            }
+            
+            
+            #section_gallery {
+                padding:50px;
+            }
+            
+        </style>
     </head>
-    <body class="container-fluid">
-        <div class="container" style="text-align:center; padding-top:50px;">
-            <h1>Safety Room</h1>
-            <p>Welcome to the safety room.</p>
-        </div>
+    <body>
+        <header>
+            <div class="navbar navbar-light" id="header_navbar">
+                <div class="container d-flex justify-content-between">
+                    <a href="#" class="navbar-brand">Safety Room</a>
+                </div>
+            </div>
+        </header>
+        <main role="main">
+            <section class="jumbotron" id="section_head">
+                <div class="container">
+                    <h1>Safety Room</h1>
+                    <p class="lead text-muted">Welcome to the safety room.</p>
+                </div>
+            </section>
+            
+            <section class="section_sensor--normal text-white" id="section_sensor">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h1>Sonar Sensor</h1>
+                            <p id="section_sensor_value">-- m</p>
+                        </div>
+                        <div class="col-md-6" style="background-color:white;">
+                            <canvas width="300" height="150" id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section_gallery">
+                <div class="container">
+                    
+                    <h1>Gallery</h1>
+                
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
+                                <div class="card-body">
+                                    <h4 class="card-title">11:40 AM</h4>
+                                    <p class="card-text">Sensor detected a person.</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small>Sunday 17/12/2017 - 11:40 AM</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
+                                <div class="card-body">
+                                    <h4 class="card-title">11:30 AM</h4>
+                                    <p class="card-text">Sensor detected a person.</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small>Sunday 17/12/2017 - 11:30 AM</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-danger text-white">
+                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
+                                <div class="card-body">
+                                    <h4 class="card-title">11:00 PM</h4>
+                                    <p class="card-text">Sensor detected a person while in alarm mode.</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small>Saturday 16/12/2017 - 11:00 PM</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </body>
+    
+    <script>
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+    </script>
+    
 </html>

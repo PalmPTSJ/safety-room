@@ -1,0 +1,13 @@
+module.exports = {
+    
+    netpie_url : 'https://api.netpie.io/topic/AppID/',
+    
+    key : "xxx",
+    secret : "yyy",
+    restAPI_auth : "xxx:yyy",
+    
+    public_html_dir : "public_html",
+    
+    gallery_db_file : "galleryDB.json",
+    gallery_dir : "public_html/gallery"
+};

@@ -11,54 +11,25 @@ const config = require('./config.js');
 // Set app (express)
 app.use(express.static(config.public_html_dir));
 
+var sensorValue = 0;
 app.get('/sensor', (req, res) => {
     // Return sensor value
-    console.log("Get sensor");
-    netpie_getMessage("sensor", resp => {
-        let parsedResp = JSON.parse(resp);
-        try {
-            res.send(parsedResp[0].payload);
-        }
-        catch(e) {
-            console.log("Error: Can't get sensor value");
-            res.send('Error');
-        }
-    });
+    res.send(""+sensorValue);
 });
 
-app.get('/sensor_post', (req, res) => {
-    let value = req.query.value;
-    console.log("Put sensor "+value);
-    netpie_putMessage("sensor", value,resp => {
-        console.log(resp,resp.message);
-        res.send(resp.message);
-    });
-});
-
-app.get('/peopleCount', (req, res) => {
+var peopleValue = 0;
+app.get('/people', (req, res) => {
     // Return sensor value
-    console.log("Get peopleCount");
-    netpie_getMessage("peopleCount", resp => {
-        let parsedResp = JSON.parse(resp);
-        try {
-            res.send(parsedResp[0].payload);
-        }
-        catch(e) {
-            console.log("Error: Can't get people count");
-            res.send('Error');
-        }
-    });
+    res.send(""+peopleValue);
 });
 
-app.get('/peopleCount_post', (req, res) => {
-    let value = req.query.value;
-    console.log("Put peopleCount "+value);
-    netpie_putMessage("peopleCount", value,resp => {
-        console.log(resp,resp.message);
-        res.send(resp.message);
-    });
+app.get('/post', (req, res) => {
+    let sensor = req.query.sensor;
+    let people = req.query.people;
+    console.log("Put sensor SENSOR:"+sensor+", PEOPLE:"+people);
+    microgear.chat('server', ""+sensor+" "+people);
+    res.send("OK");
 });
-
 
 app.get('/gallery', (req, res) => { // Get gallery json
     res.send(galleryDB);
@@ -182,6 +153,8 @@ function netpie_getMessage(topic,callback) {
     request_send(options,callback);
 }
 
+
+
 const APPID  = config.appID;
 const KEY    = config.key;
 const SECRET = config.secret;
@@ -192,19 +165,34 @@ var microgear = MicroGear.create({
 });
 
 microgear.on('connected', function() {
-    console.log('Microgear Connected...');
+    console.log('NETPIE Connected ...');
     microgear.setAlias("server");
-    /*setInterval(function() {
-        microgear.chat('server', 'Hello world.');
-    },1000);*/
 });
 
 microgear.on('message', function(topic,body) {
-    console.log('Microgear => incoming : '+topic+' : '+body);
+    
+    let data = ""+body;
+    
+    console.log('NETPIE => Received : '+topic+' : '+data);
+    
+    // parse value !
+    try {
+        console.log(data);
+        let sensor = parseInt(data.split(" ")[0]);
+        let people = parseInt(data.split(" ")[1]);
+        
+        sensorValue = sensor;
+        peopleValue = people;
+        
+        console.log("Parsed message => SENSOR:"+sensor+" PEOPLE:"+people)
+    }
+    catch(e) {
+        console.log("Message parsing error",e);
+    }
 });
 
 microgear.on('closed', function() {
-    console.log('Microgear Closed...');
+    console.log('NETPIE Closed ...');
 });
 
 microgear.connect(APPID);

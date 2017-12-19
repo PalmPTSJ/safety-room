@@ -10,6 +10,10 @@
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
         
+        <script src="microgear.js"></script>
+        
+        <script src="config.js"></script>
+        
         <style>
             #header_navbar {
                 background-color: #2196F3;
@@ -35,6 +39,19 @@
                 font-size:80px;
             }
             
+            #span_people_div {
+                border-radius:50%;
+                background-color:#FF9800;
+                padding-top:35px;
+                width:200px;
+                height:200px;
+                margin-bottom:30px;
+                display:inline-block;
+            }
+            
+            #span_people_value {
+                font-size:80px;
+            }
             
             #section_gallery {
                 padding:50px;
@@ -57,8 +74,18 @@
         <main role="main">
             <section class="jumbotron" id="section_head">
                 <div class="container">
-                    <h1>Safety Room</h1>
-                    <p class="lead text-muted">Welcome to the safety room.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h1>Safety Room</h1>
+                            <p class="lead text-muted">Welcome to the safety room.</p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <div id="span_people_div">
+                                <span id="span_people_value">1</span>
+                            </div>
+                            <h2>People inside the room</h2>
+                        </div>
+                    </div>
                 </div>
             </section>
             
@@ -82,42 +109,7 @@
                     <h1>Gallery</h1>
                 
                     <div class="row" id="gallery_div">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
-                                <div class="card-body">
-                                    <h4 class="card-title">30 Min ago</h4>
-                                    <p class="card-text">Sensor detected a person.</p>
-                                </div>
-                                <div class="card-footer">
-                                    <small>Sunday 17/12/2017 - 11:40 AM</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
-                                <div class="card-body">
-                                    <h4 class="card-title">1 Hour ago</h4>
-                                    <p class="card-text">Sensor detected a person.</p>
-                                </div>
-                                <div class="card-footer">
-                                    <small>Sunday 17/12/2017 - 11:30 AM</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card bg-danger text-white">
-                                <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
-                                <div class="card-body">
-                                    <h4 class="card-title">10 Hours ago</h4>
-                                    <p class="card-text">Sensor detected a person while in alarm mode.</p>
-                                </div>
-                                <div class="card-footer">
-                                    <small>Saturday 16/12/2017 - 11:00 PM</small>
-                                </div>
-                            </div>
-                        </div>
+                    
                     </div>
                 </div>
             </section>
@@ -163,8 +155,36 @@
         }
     });
     
-    
-    
+    /*
+    const APPID     = config.appID;
+    const APPKEY    = config.key;
+    const APPSECRET = config.secret;
+
+	var microgear = Microgear.create({
+		key: APPKEY,
+		secret: APPSECRET,
+		alias : "client"
+	});
+
+	microgear.on('message',function(topic,msg) {
+		document.getElementById("data").innerHTML = msg;
+	});
+
+	microgear.on('connected', function() {
+		microgear.setAlias('client');
+        console.log("NETPIE : Connected");
+	});
+
+	microgear.on('present', function(event) {
+		console.log(event);
+	});
+
+	microgear.on('absent', function(event) {
+		console.log(event);
+	});
+
+	microgear.connect(APPID);
+    */
     
     // Sensor update
     function sensorUpdate() {
@@ -173,6 +193,13 @@
         });
     }
     setInterval(sensorUpdate,1000);
+    
+    function peopleUpdate() {
+        jQuery.get('/people', data => {
+            $("#span_people_value").html(data);
+        });
+    }
+    setInterval(peopleUpdate,1000);
     
     function galleryUpdate() {
         jQuery.get('/gallery', data => {

@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "express": "^4.16.2",
+    "microgear": "^0.8.1",
     "node-webcam": "^0.4.3",
     "request": "^2.83.0"
   },

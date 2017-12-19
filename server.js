@@ -4,6 +4,7 @@ const path = require('path');
 const NodeWebcam = require( "node-webcam" );
 const request = require('request');
 const fs = require('fs');
+const MicroGear = require('microgear');
 
 const config = require('./config.js');
 
@@ -15,18 +16,49 @@ app.get('/sensor', (req, res) => {
     console.log("Get sensor");
     netpie_getMessage("sensor", resp => {
         let parsedResp = JSON.parse(resp);
-        res.send(parsedResp[0].payload);
+        try {
+            res.send(parsedResp[0].payload);
+        }
+        catch(e) {
+            console.log("Error: Can't get sensor value");
+            res.send('Error');
+        }
     });
 });
 
 app.get('/sensor_post', (req, res) => {
-    let sensorValue = req.query.sensorValue;
-    console.log("Put sensor "+sensorValue);
-    netpie_putMessage("sensor", sensorValue,resp => {
+    let value = req.query.value;
+    console.log("Put sensor "+value);
+    netpie_putMessage("sensor", value,resp => {
         console.log(resp,resp.message);
         res.send(resp.message);
     });
 });
+
+app.get('/peopleCount', (req, res) => {
+    // Return sensor value
+    console.log("Get peopleCount");
+    netpie_getMessage("peopleCount", resp => {
+        let parsedResp = JSON.parse(resp);
+        try {
+            res.send(parsedResp[0].payload);
+        }
+        catch(e) {
+            console.log("Error: Can't get people count");
+            res.send('Error');
+        }
+    });
+});
+
+app.get('/peopleCount_post', (req, res) => {
+    let value = req.query.value;
+    console.log("Put peopleCount "+value);
+    netpie_putMessage("peopleCount", value,resp => {
+        console.log(resp,resp.message);
+        res.send(resp.message);
+    });
+});
+
 
 app.get('/gallery', (req, res) => { // Get gallery json
     res.send(galleryDB);
@@ -68,9 +100,10 @@ function captureWebcam(callback) {
     let d = new Date();
     let timeNow = d.getTime();
     console.log("captureWebcam - will capture with time",timeNow);
-    let filename = config.gallery_dir+"/"+timeNow+".jpg";
+    let filenameRelative = config.gallery_dir + "/" + timeNow + ".jpg";
+    let filename = config.public_html_dir + "/" + filenameRelative;
     webcam.capture(filename, function( err, data ) {
-        callback(filename);
+        callback(filenameRelative);
     });
 }
 
@@ -99,11 +132,11 @@ function galleryDB_reset() {
     galleryDB_save();
     
     // delete old gallery
-    fs.readdir(config.gallery_dir, (err, files) => {
+    fs.readdir(config.public_html_dir + "/" + config.gallery_dir, (err, files) => {
         if(err) throw err;
         
         for(const file of files) {
-            fs.unlink(path.join(config.gallery_dir, file), err => {
+            fs.unlink(path.join(config.public_html_dir + "/" + config.gallery_dir, file), err => {
                 if(err) throw err;
             });
         }
@@ -119,8 +152,6 @@ function request_send(options,callback) {
             console.dir(err);
             return;
         }
-        console.dir('headers', res.headers);
-        console.dir('status code', res.statusCode);
         console.dir(body);
         
         callback(body);
@@ -150,3 +181,30 @@ function netpie_getMessage(topic,callback) {
     }
     request_send(options,callback);
 }
+
+const APPID  = config.appID;
+const KEY    = config.key;
+const SECRET = config.secret;
+
+var microgear = MicroGear.create({
+    key : KEY,
+    secret : SECRET
+});
+
+microgear.on('connected', function() {
+    console.log('Microgear Connected...');
+    microgear.setAlias("server");
+    /*setInterval(function() {
+        microgear.chat('server', 'Hello world.');
+    },1000);*/
+});
+
+microgear.on('message', function(topic,body) {
+    console.log('Microgear => incoming : '+topic+' : '+body);
+});
+
+microgear.on('closed', function() {
+    console.log('Microgear Closed...');
+});
+
+microgear.connect(APPID);

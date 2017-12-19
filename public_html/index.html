@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <!-- Bootstrap and libraries -->
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
@@ -40,6 +40,10 @@
                 padding:50px;
             }
             
+            #gallery_div > div {
+                padding-top:20px;
+            }
+            
         </style>
     </head>
     <body>
@@ -63,7 +67,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h1>Sonar Sensor</h1>
-                            <p id="section_sensor_value">-- m</p>
+                            <p id="section_sensor_value"><span id="span_sensor_value">--</span> m</p>
                         </div>
                         <div class="col-md-6" style="background-color:white;">
                             <canvas width="300" height="150" id="myChart"></canvas>
@@ -77,8 +81,7 @@
                     
                     <h1>Gallery</h1>
                 
-                
-                    <div class="row">
+                    <div class="row" id="gallery_div">
                         <div class="col-md-4">
                             <div class="card">
                                 <img class="card-img-top" src="https://images.sciencedaily.com/2017/05/170501112531_1_540x360.jpg" alt="Card image cap">
@@ -159,6 +162,33 @@
             }
         }
     });
+    
+    
+    
+    
+    // Sensor update
+    function sensorUpdate() {
+        jQuery.get('/sensor', data => {
+            $('#span_sensor_value').html(data);
+        });
+    }
+    setInterval(sensorUpdate,1000);
+    
+    function galleryUpdate() {
+        jQuery.get('/gallery', data => {
+            data.reverse();
+            let galleryHTML = '';
+            for(let imageObj of data) {
+                let cardHTML = '<div class="col-md-4"><div class="card '+(imageObj.alert?'bg-danger text-white':'')+'"><img class="card-img-top" src="'+imageObj.filename+'"><div class="card-body"> <h4 class="card-title">Enter</h4><p class="card-text">'+imageObj.msg+'</p></div><div class="card-footer"><small>'+imageObj.date+'</small></div></div></div>';
+                galleryHTML += cardHTML;
+            }
+            $("#gallery_div").html(galleryHTML);
+        });
+    }
+    galleryUpdate();
+    setInterval(galleryUpdate,3000);
+    
+    
     </script>
     
 </html>

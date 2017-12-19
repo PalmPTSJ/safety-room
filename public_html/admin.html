@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- Bootstrap and libraries -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <section>
+            <h2>Sensor value</h2>
+            <input type="text" id="sensor_get_txt"> <input type="button" value="Get" onclick="sensor_get()">
+            <br>
+            <input type="text" id="sensor_set_txt"> <input type="button" value="Set" onclick="sensor_set()">
+        </section>
+        <br>
+        
+         <section>
+            <h2>People count</h2>
+            <input type="text" id="people_get_txt"> <input type="button" value="Get" onclick="people_get()">
+            <br>
+            <input type="text" id="people_set_txt"> <input type="button" value="Set" onclick="people_set()">
+        </section>
+    </body>
+    
+    <script>
+        
+        function sensor_get() {
+            $.get('sensor', data => {
+                $("#sensor_get_txt").val(data);
+            });
+        }
+        function sensor_set() {
+            $.get('sensor_post', {"value" : $("#sensor_set_txt").val()}, data => {
+                
+            });
+        }
+        function people_get() {
+            $.get('peopleCount', data => {
+                $("#people_get_txt").val(data);
+            });
+        }
+        function people_set() {
+            $.get('peopleCount_post', {"value" : $("#people_set_txt").val()}, data => {
+                
+            });
+        }
+    
+    
+    </script>
+    
+</html>

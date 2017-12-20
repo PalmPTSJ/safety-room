@@ -1,0 +1,5 @@
+node_modules/
+config.js
+galleryDB.json
+public_html/gallery/*
+public_html/config.js

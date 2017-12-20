@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- Bootstrap and libraries -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+        <script src="microgear.js"></script>
+        
+        <script src="config.js"></script>
+        
+        <style>
+            #header_navbar {
+                background-color: #2196F3;
+            }
+            
+            
+            #section_head {
+                background-color : #FFF;
+            }
+            
+            
+            #section_sensor {
+                padding:50px;
+            }
+            
+            #section_sensor_value {
+                font-size:80px;
+            }
+            
+            #people_div {
+                border-radius:50%;
+                padding-top:35px;
+                width:200px;
+                height:200px;
+                margin-bottom:30px;
+                display:inline-block;
+            }
+            
+            .people_div--empty {
+                background-color:#4CAF50;
+            }
+            .people_div--occupied {
+                background-color:#FF9800;
+            }
+            
+            #span_people_value {
+                font-size:80px;
+            }
+            
+            #section_gallery {
+                padding:30px;
+                background-color:#EEE;
+            }
+            
+            #gallery_div > div {
+                padding-top:20px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="navbar navbar-light" id="header_navbar">
+                <div class="container d-flex justify-content-between">
+                    <a href="#" class="navbar-brand">Safety Room</a>
+                </div>
+            </div>
+        </header>
+        <main role="main">
+            
+            <section class="jumbotron" id="section_head">
+                <div class="container">
+                    <div class="row text-center">
+                        <div class="col-md-6" style="padding:10px;">
+                            <div class="card" style="padding:20px 20px;">
+                                <h1>Safety Room</h1>
+                                <p class="lead text-muted">Welcome to the safety room.</p>
+                                <br>
+                                <br>
+                                <div class="text-center">
+                                    <div id="people_div" class="people_div--empty">
+                                        <span id="span_people_value">1</span>
+                                    </div>
+                                    <h2>People inside the room</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="padding:10px;">
+                            <div class="card" style="padding:20px 20px;">
+                                <h1>Distance Sensor</h1>
+                                <p id="section_sensor_value"><span id="span_sensor_value">--</span></p>
+                                <div>
+                                    <canvas width="300" height="150" id="myChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section_gallery">
+                <div class="container">
+                    
+                    <h1>Gallery</h1>
+                
+                    <div class="row" id="gallery_div">
+                    
+                    </div>
+                </div>
+            </section>
+        </main>
+    </body>
+    
+    <script>
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data : {
+            labels : [],
+            datasets: [
+				{
+					label:"Empty",
+					data : [],
+					backgroundColor: 'rgba(255, 99, 132, 0.2)'
+				},
+				{
+					label: 'People',
+					data: [],
+					backgroundColor: 'rgba(99, 255, 132, 0.2)'
+				}
+			]
+        },
+        options: {
+				scales: {
+					yAxes: [{
+						ticks: {
+							beginAtZero:true
+						}
+					}]
+				},
+				animation : false
+			}
+    });
+    
+    var sensorData = [];
+    function isPeople(sensor) {
+        return sensor<=100;
+    }
+    function chartUpdate() {
+        var labels = [];
+        var dataWall = [];
+        var dataPeople = [];
+        for(var i = 0;i < sensorData.length;i++) {
+            labels.push(sensorData[i][0]);
+            dataWall.push(null);
+            dataPeople.push(null);
+            
+            if(i == 0 || isPeople(sensorData[i-1][1]) || isPeople(sensorData[i][1])) {
+                dataPeople[i] = sensorData[i][1];
+                if(i > 0) dataPeople[i-1] = sensorData[i-1][1];
+            }
+            if(!isPeople(sensorData[i][1])) {
+                dataWall[i] = sensorData[i][1];
+            }
+        }
+        myChart.data.labels = labels;
+        myChart.data.datasets[0].data = dataWall;
+        myChart.data.datasets[1].data = dataPeople;
+        myChart.update();
+    }
+    
+    // Sensor update
+    
+    function sensorUpdate() {
+        jQuery.get('/sensor', data => {
+            if(data == "-1") data = "--";
+            $('#span_sensor_value').html(data);
+            
+            if(data != "--") {
+                let timestamp = (new Date()).toLocaleTimeString();
+                if(sensorData.length >= 30) sensorData.shift();
+                sensorData.push([timestamp,parseInt(data)]);
+                chartUpdate();
+            }
+        });
+    }
+    setInterval(sensorUpdate,400);
+    
+    function peopleUpdate() {
+        jQuery.get('/people', data => {
+            if(data == "-1") data = "--";
+            $("#span_people_value").html(data);
+            if(data == "--" || data == "0") {
+                $("#people_div").removeClass("people_div--occupied");
+                $("#people_div").addClass("people_div--empty");
+            }
+            else {
+                $("#people_div").removeClass("people_div--empty");
+                $("#people_div").addClass("people_div--occupied");
+            }
+        });
+    }
+    setInterval(peopleUpdate,1000);
+    
+    function galleryUpdate() {
+        jQuery.get('/gallery', data => {
+            data.reverse();
+            
+            let galleryHTML = '';
+            for(let i = 0;i < 6;i++) {
+                if(i >= data.length) break;
+                let imageObj = data[i];
+                let cardHTML = '<div class="col-md-4"><div class="card '+(imageObj.alert?'bg-danger text-white':'')+'"><img class="card-img-top" src="'+imageObj.filename+'"><div class="card-body"> <h4 class="card-title">'+imageObj.title+'</h4><p class="card-text">'+imageObj.msg+'</p></div><div class="card-footer"><small>'+imageObj.date+'</small></div></div></div>';
+                galleryHTML += cardHTML;
+            }
+            $("#gallery_div").html(galleryHTML);
+        });
+    }
+    galleryUpdate();
+    setInterval(galleryUpdate,2000);
+    
+    
+    </script>
+    
+</html>

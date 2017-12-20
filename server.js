@@ -11,15 +11,13 @@ const config = require('./config.js');
 // Set app (express)
 app.use(express.static(config.public_html_dir));
 
-var sensorValue = 0;
-app.get('/sensor', (req, res) => {
-    // Return sensor value
+var sensorValue = -1;
+app.get('/sensor', (req, res) => { // Return sensor value
     res.send(""+sensorValue);
 });
 
-var peopleValue = 0;
-app.get('/people', (req, res) => {
-    // Return sensor value
+var peopleValue = -1;
+app.get('/people', (req, res) => {// Return people value
     res.send(""+peopleValue);
 });
 
@@ -40,20 +38,7 @@ app.get('/gallery_reset', (req, res) => { // Reset gallery
 });
 
 app.get('/webcam', (req, res) => {
-    console.log("Gallery now",galleryDB);
-    captureWebcam((filename) => {
-        console.log("Webcam capture Done !");
-        let d = new Date();
-        galleryDB.push({
-            filename : filename,
-            date : d.toLocaleString(),
-            alert : false,
-            msg : "Test picture"
-        });
-        galleryDB_save();
-        
-        res.send("Success");
-    })
+    captureNewPicture("Manual","Manual capture command received.");
 });
 
 app.listen(8080, () => console.log('Example app listening on port 8080!'));
@@ -70,7 +55,6 @@ var webcam = NodeWebcam.create( webcam_opts );
 function captureWebcam(callback) {
     let d = new Date();
     let timeNow = d.getTime();
-    console.log("captureWebcam - will capture with time",timeNow);
     let filenameRelative = config.gallery_dir + "/" + timeNow + ".jpg";
     let filename = config.public_html_dir + "/" + filenameRelative;
     webcam.capture(filename, function( err, data ) {
@@ -78,11 +62,27 @@ function captureWebcam(callback) {
     });
 }
 
+function captureNewPicture(title,msg) {
+    console.log("Capturing new picture ... ");
+    captureWebcam((filename) => {
+        let d = new Date();
+        galleryDB.push({
+            filename : filename,
+            date : d.toLocaleString(),
+            alert : false,
+            title : title,
+            msg : msg
+        });
+        galleryDB_save();
+        console.log("Captured as "+filename);
+    });
+}
+
+
 // Gallery Database function
-var galleryDB = []; // {imgName:"xx.jpg", date:"12/12/2017 20:20", alert:true, msg:"GG"}
+var galleryDB = []; // {imgName:"xx.jpg", date:"12/12/2017 20:20", alert:true, title:"X", msg:"GG"}
 function galleryDB_load() {
-    if (fs.existsSync(config.gallery_db_file)) {
-        // Load from file
+    if (fs.existsSync(config.gallery_db_file)) { // Load from file
         fs.readFile(config.gallery_db_file, (err, data) => {
             if (err) throw err;
             galleryDB = JSON.parse(data);
@@ -99,7 +99,6 @@ function galleryDB_save() {
 }
 function galleryDB_reset() {
     galleryDB = [];
-    // reset file
     galleryDB_save();
     
     // delete old gallery
@@ -173,18 +172,33 @@ microgear.on('message', function(topic,body) {
     
     let data = ""+body;
     
-    console.log('NETPIE => Received : '+topic+' : '+data);
+    console.log('NETPIE Received : '+topic+' : '+data);
     
     // parse value !
     try {
         console.log(data);
         let sensor = parseInt(data.split(" ")[0]);
-        let people = parseInt(data.split(" ")[1]);
-        
+        console.log("Parsed message => SENSOR:"+sensor);
         sensorValue = sensor;
+        
+        let people = parseInt(data.split(" ")[1]);
+        console.log("Parsed message => PEOPLE:"+people);
+        if(peopleValue != -1) {
+            let totalPeopleMsg;
+            if(people == 1) totalPeopleMsg = "There is 1 person now.";
+            else totalPeopleMsg = "There are "+people+" people now.";
+            
+            if(people > peopleValue) {
+                console.log("Person entered the room");
+                captureNewPicture("Enter","Sensor detected a person entered the room. "+totalPeopleMsg);
+            }
+            else if(people < peopleValue) {
+                console.log("Person exited the room");
+                captureNewPicture("Exit","Sensor detected a person exited the room. "+totalPeopleMsg);
+            }
+        }
         peopleValue = people;
         
-        console.log("Parsed message => SENSOR:"+sensor+" PEOPLE:"+people)
     }
     catch(e) {
         console.log("Message parsing error",e);

@@ -1,0 +1,6 @@
+var config = {
+    appID : "AppID",
+    key : "xxx",
+    secret : "yyy",
+    restAPI_auth : "xxx:yyy",
+};

@@ -1,2 +1,10 @@
 # safety-room
-Safety room project for HW SYN LAB
+Safety room project for HW SYN LAB 2017-1
+
+Project member
+---
+
+1. นาย ภาคย์ มณีฉาย 5830413621 
+2. นาย สิปปกร เจนคุณาวัฒน์ 5831077621 
+3. นาย สรรเพชญ จึงวิสิฐธน 5730613721 
+4. นาย ภัทระ ธีระพงษ์ 5831051221

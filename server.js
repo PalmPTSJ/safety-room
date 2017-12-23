@@ -158,6 +158,8 @@ const APPID  = config.appID;
 const KEY    = config.key;
 const SECRET = config.secret;
 
+console.log(APPID,KEY,SECRET);
+
 var microgear = MicroGear.create({
     key : KEY,
     secret : SECRET
